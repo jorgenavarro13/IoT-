@@ -1,0 +1,78 @@
+
+//1. Incluye librerías necesarias, ejemplo:
+  #include <DHT.h>  
+  #include <string.h>
+  #include <stdlib.h>
+
+//2. Define un nombre para tus valores constantes, ejemplo
+  #define ht11  4    // "DHTPIN"      
+    #define DHTTYPE DHT11
+    #define Lamp1 2    //           //     LED, Lamparas a controlar.
+    #define Lamp2 5   // 
+
+// Inicializa el sensor de humedad, ejemplo:
+  DHT dht(ht11, DHTTYPE);  //Inicializa el sensor
+
+// Declara tus variables globales, ejemplo:
+  int  lecturaSensorA0 = 0;      // Lectura sensor analogico
+    int  umbral_A0 = 500;          // Criterio para realizar una acción de control
+    int  umbral_D =  40;   
+
+void setup(){
+  pinMode(Lamp1, OUTPUT);    //     Configuración de pines
+  pinMode(Lamp2, OUTPUT);
+  digitalWrite(Lamp1, LOW);  //   Inicializar valores en los pines
+  digitalWrite(Lamp2, LOW);                        
+  Serial.begin(9600);        // Inicializar comunicación serial
+  dht.begin();       // Inicialializar sensor DHT
+}
+void loop(){
+
+{
+  float h;          //Declara tus variables locales
+    float tmp;
+  String msg_str = "Hello World";
+  int lecturaSensorA0 = analogRead(A0);            //     ****  Sensor analogico                         
+    float voltage =  lecturaSensorA0 * (3.3 / 1023.0);
+  
+  //Definimos criterios de ajuste (control de acciones) y interactuamos por el puerto serie.
+   
+  if(voltage <= 0.05){
+        delay(1000);
+        Serial.print("   LED ON");
+        digitalWrite(Lamp1, HIGH);
+        digitalWrite(Lamp2,LOW);
+   
+   }
+    else{
+        delay(1000);
+        Serial.print("   LED OFF");
+        digitalWrite(Lamp1, LOW);
+        digitalWrite(Lamp2,HIGH);
+   
+    } 
+    Serial.print("  ADC= ");
+    Serial.print(lecturaSensorA0);
+    Serial.print("  Voltaje= ");
+    Serial.println(voltage);
+  
+        delay(1000);
+
+  h = dht.readHumidity();                         // Leer la humedad relativa
+        tmp = dht.readTemperature();                    // Leer teperatura en grados centígrados (dht.readTemperature(true)  en grados Fahrenheit)
+        
+                                                      // Comprobamos si ha habido algún error en la lectura
+        if (isnan(h) || isnan(tmp) )                            {
+            Serial.println("Error obteniendo los datos del sensor DHT11");
+            //return;                                                    
+                                                                        }
+        msg_str = "The Temperature value is: ";         // Construye mensaje (manejado como STRING).
+        Serial.println(msg_str);
+        Serial.println(tmp);
+        
+        msg_str = "The humidity value is: ";            // Construye mensaje (manejado como STRING).
+        Serial.println(msg_str);
+        Serial.println(h);    
+        
+}
+}
