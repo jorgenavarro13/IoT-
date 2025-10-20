@@ -1,0 +1,62 @@
+#include <DHT.h>
+
+#define DHTPIN 4       // Pin del sensor DHT11
+#define DHTTYPE DHT11
+DHT dht(DHTPIN, DHTTYPE);
+
+long randomNumber;
+long cnt = 0;
+    #define Lamp1 2    //           //     LED, Lamparas a controlar.
+    #define Lamp2 5   // 
+
+void setup() {
+  Serial.begin(9600);
+  dht.begin();
+  randomSeed(analogRead(A0));
+  pinMode(Lamp1, OUTPUT);    //     Configuración de pines
+  pinMode(Lamp2, OUTPUT);
+  digitalWrite(Lamp1, LOW);  //   Inicializar valores en los pines
+  digitalWrite(Lamp2, LOW);                        
+
+
+  // Encabezados para PLX-DAQ
+  Serial.println("CLEARDATA");        // Limpia datos anteriores en Excel
+  Serial.println("LABEL,Conteo,Random,ADC,Voltaje,Temperatura,Humedad"); // Etiquetas de las columnas
+}
+
+void loop() {
+  float h = dht.readHumidity();      // Humedad relativa
+  float tmp = dht.readTemperature(); // Temperatura (°C)
+  int lecturaSensorA0 = analogRead(A0);
+  float voltage = lecturaSensorA0 * (3.3 / 1023.0);
+  randomNumber = random(1, 100);
+
+  // Si la lectura falla
+  if (isnan(h) || isnan(tmp)) {
+    Serial.println("Error obteniendo los datos del sensor DHT11");
+    delay(1000);
+    return;
+  }
+
+    if(voltage <= 0.05){
+        digitalWrite(Lamp1, HIGH);
+        digitalWrite(Lamp2,LOW);
+   
+   }
+    else{
+        digitalWrite(Lamp1, LOW);
+        digitalWrite(Lamp2,HIGH);
+   
+    } 
+
+  // Enviar datos a Excel (una sola línea separada por comas)
+  //Serial.print("DATA,");
+  //Serial.print(cnt++); Serial.print(",");
+  //Serial.print(randomNumber); Serial.print(",");
+  Serial.print(lecturaSensorA0); Serial.print(",");
+  Serial.print(voltage); Serial.print(",");
+  Serial.print(tmp); Serial.print(",");
+  Serial.println(h);
+
+  delay(1000);
+}
