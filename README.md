@@ -28,5 +28,5 @@ https://handsontec.com/dataspecs/module/esp8266-V13.pdf
 
 
 ## Definición de pines
-![This is an alt text.](/image/sample.webp "This is a sample image.")
+![Diagrama de NODE MCU](/nodemcu_pinout.png)
 
