@@ -241,11 +241,19 @@ void loop() {
 
 
 ## Conectar con base de datos con la terminal 
+
+Para hacerlo de manera local, usa el puerto que este activo o donde tienes tu DB.
 ```
 mysql -u root -p -P 3307
 show databases
 use iot
 ```
+
+## Conectar desde cloud 
+
+Página web: 
+This is [página](https://console.aiven.io/account/a572eeeac392/project/tec-71e9/services/mysql-2fa74875/overview) tiene el enlace de mi certificado.
+- Metete a DBeaver y copia los datos, el certificado y haz la conexión.
 
 
 ## Buzzer info
