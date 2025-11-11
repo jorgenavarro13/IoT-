@@ -251,9 +251,14 @@ use iot
 
 ## Conectar desde cloud 
 
-Página web: 
+Página web: *Utiliza tu cuenta institucional*
 This is [página](https://console.aiven.io/account/a572eeeac392/project/tec-71e9/services/mysql-2fa74875/overview) tiene el enlace de mi certificado.
 - Metete a DBeaver y copia los datos, el certificado y haz la conexión.
+
+## Locker Studio
+Sirve para hacer la graficación de la data incluida en la base de datos, este es parte de la suite de Google.
+
+
 
 
 ## Buzzer info
