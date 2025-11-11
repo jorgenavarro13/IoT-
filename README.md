@@ -240,7 +240,12 @@ void loop() {
 ```
 
 
-
+## Conectar con base de datos con la terminal 
+```
+mysql -u root -p -P 3307
+show databases
+use iot
+```
 
 
 ## Buzzer info
