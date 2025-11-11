@@ -240,7 +240,7 @@ void loop() {
 ```
 
 
-## Conectar con base de datos con la terminal 
+## Scripts de MySQL desde la terminal
 
 Para hacerlo de manera local, usa el puerto que este activo o donde tienes tu DB.
 ```
@@ -249,14 +249,15 @@ show databases
 use iot
 ```
 
-## Conectar desde cloud 
+## Conectar desde clod AIVEN
 
 Página web: *Utiliza tu cuenta institucional*
 This is [página](https://console.aiven.io/account/a572eeeac392/project/tec-71e9/services/mysql-2fa74875/overview) tiene el enlace de mi certificado.
-- Metete a DBeaver y copia los datos, el certificado y haz la conexión.
+- Metete a DBeaver y copia los datos solicitados (puerto, url, user, host) e ingresa el certificado que viene en la página de arriba con extensión **.pem**, corrobora la conexión y finaliza el proceso
 
 ## Locker Studio
 Sirve para hacer la graficación de la data incluida en la base de datos, este es parte de la suite de Google.
+Permite hacer una visualización de los datos de manera agrupada y de manera visual, tipo PowerBi o similares
 
 
 
