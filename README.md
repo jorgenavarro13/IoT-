@@ -5,7 +5,7 @@ Este repositorio intenta recabar información relevante para la realización del
 
 ### Bienvenido a NodeMCU
 <!--![Diagrama de NODE MCU](/nodemcu_pinout.png)-->
-<img src="/nodemcu_pinout.png" alt="Pines_NodeMCU" style="width:300px;"/>
+<img src="/images/nodemcu_pinout.png" alt="Pines_NodeMCU" style="width:300px;"/>
 
 NodeMCU es **placa de desarrollo**  de hardware y software de código abierto para proyectos de Internet de las Cosas (IoT), utiliza el **chip microcontrolador ESP-8266**. Siendo una herramienta muy poderosa sabiendolo ocupar.
 
