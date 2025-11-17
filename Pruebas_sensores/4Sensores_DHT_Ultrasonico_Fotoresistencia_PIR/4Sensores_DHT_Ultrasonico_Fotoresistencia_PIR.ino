@@ -3,12 +3,13 @@
 
 // --- Definiciones Sensores (Sketch 1) ---
 #define DHTTYPE DHT11
-#define LDRPIN A0
-const int trigPin = D3;
-const int echoPin = D2;
-const int LR = D5;       // Pin para el LED/Relé del ultrasónico
+#define LDRPIN A0 
+//LDRPIN es el pin de la fotoresistencia
+const int trigPin = D3; //TrigPin -> Sensor Ultrasónico
+const int echoPin = D2; //EchoPin -> Sensor Ultrasónico
+const int LR = D5;       // Pin para el LED
 const int dhtPin = D1;   // Pin del sensor DHT11
-float voltageLDR=0.0;
+float voltageLDR=0.0; 
 const int sensorGas=D4;
 
 #define SOUND_SPEED 0.034
@@ -83,8 +84,6 @@ void loop() {
   int lecturaSensorA0=analogRead(LDRPIN);
   voltageLDR=lecturaSensorA0*(3.3/1023.0);
 
-  //-------Lectura Fotoresistencia--------------
-
   //-------Lectura de GAS------------------
   float lecturaGas=analogRead(sensorGas);
   
@@ -101,9 +100,9 @@ void loop() {
 
   // Lógica del Ultrasónico (Sketch 1)
   if (distanceCm < 10) {
-    digitalWrite(LR, HIGH); // Activar Relé/LED
+    digitalWrite(LR, HIGH); // Activar LED
   } else {
-    digitalWrite(LR, LOW);  // Desactivar Relé/LED
+    digitalWrite(LR, LOW);  // Desactivar LED
   }
 
   // --- 5. Enviar Datos por Serial (Formato PLX-DAQ) ---
