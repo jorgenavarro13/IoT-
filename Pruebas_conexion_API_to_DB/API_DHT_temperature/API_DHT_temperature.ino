@@ -12,12 +12,12 @@ DHT dht(D1, DHTTYPE);
 // --- CONFIGURA ESTO ---
 //ssid, password y " .ttp://xxxxx:3000/"
 
-const char* ssid = "Carlos's sister GOD";
-const char* password = "12345678";
+const char* ssid = "AndroidAP";
+const char* password = "11021102";
 
 // 1. Reemplaza por la IP local de tu PC (ej. 192.168.1.100)
 // 2. El endpoint es /insertTemperature, como en constants.js
-String serverName = "http://10.235.177.244:3000/iot/api/insertTemperature";
+String serverName = "http://10.38.111.244:3000/iot/api/insertTemperature";
 // ---------------------
 
 void setup() {
@@ -33,6 +33,7 @@ void setup() {
   Serial.println("\nConectado a WiFi");
   Serial.print("IP: ");
   Serial.println(WiFi.localIP());
+  
 }
 
 void loop() {

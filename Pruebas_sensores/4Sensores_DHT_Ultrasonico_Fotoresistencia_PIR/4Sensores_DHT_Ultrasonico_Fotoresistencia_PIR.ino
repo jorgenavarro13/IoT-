@@ -112,16 +112,16 @@ void loop() {
     Serial.println("Error DHT,,,,"); // Enviar error si el DHT falla
   } else {
     // Imprimir todos los datos en una sola línea, separados por comas
-    Serial.print(pirState);
+    Serial.print(pirState);//Sensor PIR (Movimiento)
     Serial.print(",");
-    Serial.print(temp);
+    Serial.print(temp);//Sensor de temperatura
     Serial.print(",");
-    Serial.print(distanceCm);
+    Serial.print(distanceCm);//Ultrasonico (Distancia)
     Serial.print(",");
     Serial.println(lecturaSensorA0);//Fotoresistencia
     
     //Serial.print(",");
-    //Serial.println(lecturaGas);Todavia no esta implementado porque igual es analogica
+    //Serial.println(lecturaGas);Todavia no esta implementado porque igual es analogica y se necesita otra placa
     
   }
 
