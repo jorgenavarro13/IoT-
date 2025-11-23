@@ -1,102 +1,74 @@
-
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <WiFiClient.h>
+#include <Servo.h>
 
-
-const char* ssid = "IZZI-2F56";
-const char* password = "RtemPaFA";
-
-// 1. Reemplaza por la IP local de tu PC (ej. 192.168.1.100)
-// 2. El endpoint es /insertTemperature, como en constants.js
-
-String serverName = "http://192.168.1.40:3000/iot/api/insertPIR";
-
-// Definición de pines para la prueba
-const int pinPrueba = D2;
+//-----Declaracion PINES----------
+const int pinPIR = D0;
+const int pinServo = D1;
+const int pinGasDigital = D2;
+const int pinRele = D5;      // NUEVO: Pin para el Relé del ventilador
+const int pinGasAnalogico = A0;
+const int pinGasLED = D6;
 
 // Variable de estado
-int estado = 0;
+Servo servo;
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
+
+  //---------CONFIGURACION PINES-------
+  pinMode(pinPIR, INPUT);
+  pinMode(pinGasDigital, INPUT);
   
-  // *** CAMBIO CRUCIAL: Usamos INPUT_PULLUP ***
-  // Esto activa la resistencia interna que fuerza al pin a HIGH por defecto.
-  // Ahora, el pin solo será LOW cuando el sensor PIR lo active.
-  pinMode(pinPrueba, INPUT_PULLUP); 
+  // Configurar el Relé como salida
+  pinMode(pinRele, OUTPUT);
+  pinMode(pinGasLED, OUTPUT);
+  digitalWrite(pinRele, HIGH); // Inicialmente apagado (para relés de lógica inversa)
+  digitalWrite(pinGasLED, LOW);
 
-  Serial.println("--- PRUEBA DE DEBUGGING CON PULLUP INTERNO INICIADA ---");
-  Serial.println("Estado por defecto: ALTO (HIGH)");
-  Serial.println("Movimiento detectado: BAJO (LOW)");
-
-
-
-    //Configuracion cliente wifi
-  WiFi.begin(ssid, password);
-  Serial.println("Conectando a WiFi...");
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("\nConectado a WiFi");
-  Serial.print("IP: ");
-  Serial.println(WiFi.localIP());
-
+  //---------SERVO-------
+  servo.attach(pinServo);
+  
+  Serial.println("Sistema iniciado...");
+  delay(1000); 
 }
 
 void loop() {
-  // Leer el estado del pin
-  estado = digitalRead(pinPrueba);
-
-  // Comprobación de estado y mensajes
-  if (estado == LOW) {
-    // Si el PULLUP está activo, LOW significa que el sensor ha tirado el voltaje a tierra.
-    Serial.println(">>> ¡Movimiento / Señal Detectada! (Pin en LOW) <<<");
-  } else {
-    // HIGH es el estado inactivo, forzado por la resistencia PULLUP.
-    Serial.println("Pin inactivo (Pin en HIGH)");
-  }
-
-  // Imprimir el valor real (0 para LOW, 1 para HIGH)
-  Serial.print("Valor crudo del pin: ");
-  Serial.println(estado);
-
-
-if (WiFi.status() == WL_CONNECTED) {
-    WiFiClient client;
-    HTTPClient http;
-
-    http.begin(client, serverName);
-    http.addHeader("Content-Type", "application/json");
-
-    // Crear el JSON. Debe coincidir con lo que espera la API: {"valor": "XX.XX"}
-    //
-    String httpRequestData = "{\"estado\":\"" + String(estado) + "\"}";
-
-    Serial.print("Enviando JSON: ");
-    Serial.println(httpRequestData);
-
-    // Enviar la petición POST
-    int httpResponseCode = http.POST(httpRequestData);
-
-    if (httpResponseCode > 0) {
-      Serial.print("Código de respuesta HTTP: ");
-      Serial.println(httpResponseCode);
-      String payload = http.getString();
-      Serial.println(payload);
-    } else {
-      Serial.print("Error en el envío POST. Código: ");
-      Serial.println(httpResponseCode);
-    }
-    http.end();
-  } else {
-    Serial.println("Error: WiFi desconectado");
-  }
-
-
   
+  //------------SENSOR GAS-------------------------
+  int valorGasAnalogico = analogRead(pinGasAnalogico);
+  int valorGasDigital = digitalRead(pinGasDigital);
+  
+  Serial.print("Gas (ADC): ");
+  Serial.print(valorGasAnalogico);
+  Serial.print(" | Gas (Digital): ");
+  Serial.println(valorGasDigital);
 
-  // Esperar 3 segundo
+  // Lógica de seguridad: Si detecta gas, enciende el ventilador
+  // (Ojo: Los sensores digitales de gas suelen dar 0 cuando detectan y 1 cuando no, 
+  // o viceversa. Ajusta según tu sensor).
+  if (valorGasAnalogico>=650) { // Asumiendo LOW = Gas detectado
+      Serial.println("¡GAS DETECTADO! Activando ventilador...");
+      digitalWrite(pinRele, LOW); // Enciende relé (Lógica inversa)
+      digitalWrite(pinGasLED, HIGH);
+  } else {
+      digitalWrite(pinRele, HIGH); // Apaga relé
+      digitalWrite(pinGasLED, LOW);
+  }
+
+  //------------SENSOR PIR (MOVIMIENTO)------------
+  int lecturaPIR = digitalRead(pinPIR);
+  
+  if (lecturaPIR == HIGH) {
+    Serial.println("ALERTA: ¡Movimiento detectado!");
+    servo.write(180);
+    delay(2000);
+    servo.write(0);
+  } else {
+    Serial.println("Estado: Zona tranquila");
+  }
+
+  //--------------SERVO Y PRUEBA RELE--------------------
   delay(3000);
 }
