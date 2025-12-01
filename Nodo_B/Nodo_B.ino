@@ -6,6 +6,15 @@
 // --- ESP-NOW --- Librerías Adicionales
 #include <ESP8266WiFi.h>
 #include <espnow.h>
+#include <ESP8266HTTPClient.h>
+#include <WiFiClientSecure.h> // <--- CAMBIO 1: Importante para HTTPS
+
+//------------------Conexión internet---------------
+const char* ssid = "Tec-IoT";
+const char* password = "spotless.magnetic.bridge";
+
+//http://192.168.1.40:3000/iot/api/insertAllSensors
+String serverName = "https://api-iot-6t7d.onrender.com/iot/api/insertAllSensors";
 
 // ================= DEFINICIONES ESP-NOW =================
 // --- IMPORTANTE: Esta estructura DEBE SER EXACTAMENTE IGUAL a la del EMISOR ---
@@ -22,7 +31,6 @@ bool datosFrescos = false;     // Bandera para saber si acaba de llegar info
 void OnDataRecv(uint8_t * mac, uint8_t *incomingData, uint8_t len) {
   memcpy(&datosRecibidos, incomingData, sizeof(datosRecibidos));
   datosFrescos = true; // Indicamos que llegó data nueva
-  //Serial.println("¡Datos recibidos por ESP-NOW!"); // Depuración
 }
 // ========================================================
 
@@ -52,7 +60,7 @@ DHT dht(dhtPin, DHT11);  // ✅ objeto DHT
 #define SOUND_SPEED 0.034  // cm/us
 
 // Intervalo del bucle (Reducido para mejor respuesta de la pantalla)
-const long loopInterval = 100; 
+const long loopInterval = 1000; // Un poco más largo para no saturar la API
 
 // Objeto pantalla
 Adafruit_SSD1306 display(ancho, alto, &Wire, -1);
@@ -114,6 +122,20 @@ void setup() {
   // Inicializar datos recibidos en falso por seguridad
   datosRecibidos.gasPeligroso = false;
   datosRecibidos.tapaAbierta = false;
+  datosRecibidos.valorGas = 0;
+
+
+  WiFi.begin(ssid, password);
+  Serial.println("Conectando a WiFi...");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\nConectado a WiFi");
+  Serial.print("IP: ");
+  Serial.println(WiFi.localIP());
+
+  
 
   display.clearDisplay();
   display.setCursor(0, 0);
@@ -228,6 +250,59 @@ void loop() {
   Serial.print(lecturaLuz);
   Serial.print(",");
   Serial.println(datosRecibidos.gasPeligroso); // Agregamos el estado del gas al serial
+
+  //-----------Enviamos datos a DB usando la API-----------------
+  int valorTapaAbierta = datosRecibidos.tapaAbierta ? 1 : 0;
+  
+  if (WiFi.status() == WL_CONNECTED) {
+    
+    // <--- CAMBIO 2: Usar WiFiClientSecure en lugar de WiFiClient
+    WiFiClientSecure client;
+    
+    // <--- CAMBIO 3: Ignorar validación de certificado SSL (Necesario para Cloudflare/Render simple)
+    client.setInsecure(); 
+
+    HTTPClient http;
+
+    // Pasamos el cliente seguro a http.begin
+    if (http.begin(client, serverName)) { 
+    
+        http.addHeader("Content-Type", "application/json");
+
+        // Crear el JSON.
+        //level, temperature, light, gas, open
+        String httpRequestData = 
+          "{"
+            "\"level\":\"" + String(distanceCm) + "\"," 
+            "\"temperature\":\"" + String(temp) + "\"," 
+            "\"light\":\"" + String(lecturaLuz) + "\"," 
+            "\"gas\":\"" + String(datosRecibidos.valorGas) + "\"," 
+            "\"open\":\"" + String(valorTapaAbierta) + "\""
+          "}";
+
+        
+        Serial.print("Enviando JSON Seguro: ");
+        Serial.println(httpRequestData);
+
+        // Enviar la petición POST
+        int httpResponseCode = http.POST(httpRequestData);
+
+        if (httpResponseCode > 0) {
+          Serial.print("Código de respuesta HTTP: ");
+          Serial.println(httpResponseCode);
+          String payload = http.getString();
+          Serial.println(payload);
+        } else {
+          Serial.print("Error en el envío POST. Código: ");
+          Serial.println(httpResponseCode);
+        }
+        http.end();
+    } else {
+        Serial.println("No se pudo conectar al servidor HTTPS");
+    }
+  } else {
+    Serial.println("Error: WiFi desconectado");
+  }
 
 
   // --- 5. Delay y Reset de bandera ---
